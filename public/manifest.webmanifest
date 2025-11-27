@@ -1,0 +1,16 @@
+{
+    "name": "Learn4ever",
+    "short_name": "L4E",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#050d0a",
+    "theme_color": "#050d0a",
+    "icons": [
+      {
+        "src": "/icons/L4E.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }  
+  
