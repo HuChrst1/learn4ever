@@ -1,54 +1,23 @@
 // public/sw.js
+// Very simple "no-cache" service worker for Learn4ever.
+// It only clears old caches and does NOT intercept network requests.
 
-const CACHE_NAME = "l4e-cache-v1";
-
-// Tu peux en rajouter plus tard (icônes, etc.)
-const ASSETS_TO_CACHE = [
-  "/",
-  "/index.html",
-  "/manifest.webmanifest",
-];
+const CACHE_NAME = "learn4ever-no-cache-v1";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
-        // En dev, si un fichier manque, on log juste
-        console.warn("[SW] Cache error:", err);
-      });
-    })
-  );
+  // Activate immediately
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
+  // Delete all existing caches when a new SW is activated
   event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames.map((name) => {
-          if (name !== CACHE_NAME) {
-            return caches.delete(name);
-          }
-        })
-      )
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((key) => caches.delete(key)))
     )
   );
+  self.clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  if (request.method !== "GET") return;
-
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-
-      return fetch(request).catch(() => {
-        // Si offline et navigation → on renvoie index.html
-        if (request.mode === "navigate") {
-          return caches.match("/index.html");
-        }
-        return undefined;
-      });
-    })
-  );
-});
+// No "fetch" event handler => the SW does not cache or serve files.
+// The browser just loads everything normally from the network.
