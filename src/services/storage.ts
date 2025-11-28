@@ -257,4 +257,34 @@ import type {
   
     saveDB(db);
   }
-  
+  /**
+ * Récupère toute la base sous forme de string JSON pour l'export.
+ */
+export function getDBAsJSON(): string {
+  const db = loadDB();
+  return JSON.stringify(db, null, 2); // Indenté pour être lisible
+}
+
+/**
+ * Importe une sauvegarde JSON complète.
+ * Valide la structure avant d'écraser les données actuelles.
+ * Retourne true si succès, false sinon.
+ */
+export function importDBFromJSON(jsonString: string): boolean {
+  try {
+    const parsed = JSON.parse(jsonString) as SpacedNotesDB;
+    
+    // Vérification de sécurité : on s'assure que le fichier contient bien des notes
+    if (!Array.isArray(parsed.notes) || !Array.isArray(parsed.repetitions)) {
+      console.error("Format de sauvegarde invalide (manque notes ou repetitions).");
+      return false;
+    }
+
+    // Si tout est bon, on écrase la base actuelle
+    saveDB(parsed);
+    return true;
+  } catch (e) {
+    console.error("Erreur lors de l'import :", e);
+    return false;
+  }
+}
